@@ -4,19 +4,22 @@
 #include <cstdlib>
 #include <string>
 
-struct SupabaseConfig {
-    std::string url;      // e.g. https://YOUR_PROJECT.supabase.co
+struct SupabaseConfig 
+{
+    std::string url;  
     std::string anon_key;
 };
 
-static size_t write_cb(char* ptr, size_t size, size_t nmemb, void* userdata) {
+static size_t write_cb(char* ptr, size_t size, size_t nmemb, void* userdata) 
+{
     auto* out = static_cast<std::string*>(userdata);
     out->append(ptr, size * nmemb);
     return size * nmemb;
 }
 
 // Sends a GET to the Supabase REST API. Returns the HTTP status (0 if unreachable).
-static long supabase_get(const SupabaseConfig& cfg, const std::string& path_and_query, std::string& body) {
+static long supabase_get(const SupabaseConfig& cfg, const std::string& path_and_query, std::string& body) 
+{
     CURL* curl = curl_easy_init();
     if (!curl) return 0;
 
@@ -41,7 +44,8 @@ static long supabase_get(const SupabaseConfig& cfg, const std::string& path_and_
     return status;
 }
 
-static crow::response json_error(int code, const std::string& message) {
+static crow::response json_error(int code, const std::string& message) 
+{
     crow::response res;
     res.code = code;
     res.set_header("Content-Type", "application/json");
@@ -49,9 +53,11 @@ static crow::response json_error(int code, const std::string& message) {
     return res;
 }
 
-int main() {
+int main() 
+{
     const char* url = std::getenv("SUPABASE_URL");
     const char* key = std::getenv("SUPABASE_ANON_KEY");
+
     if (!url || !key) {
         fprintf(stderr, "Set SUPABASE_URL and SUPABASE_ANON_KEY first.\n");
         return 1;
@@ -66,10 +72,12 @@ int main() {
         return "Hello from CMPE-320!";
     });
 
-    // GET /classes            -> all classes
-    // GET /classes?name=calc  -> classes whose name contains "calc"
+    // GET /classes                  -> all classes
+    // GET /classes?name=calc        -> classes whose name contains "calc"
+    // GET /classes?code=MTH         -> classes whose code starts with "MTH"
     CROW_ROUTE(app, "/classes")([&cfg](const crow::request& req) {
         std::string term = req.url_params.get("name") ? req.url_params.get("name") : "";
+        std::string code = req.url_params.get("code") ? req.url_params.get("code") : "";
 
         // Trim surrounding spaces
         auto first = term.find_first_not_of(' ');
@@ -85,11 +93,31 @@ int main() {
             }
         }
 
+        if (code.size() > 20) {
+            return json_error(400, "Course code search must be at most 20 characters");
+        }
+        for (char c : code) {
+            if (!(std::isalnum(static_cast<unsigned char>(c)) || c == '-')) {
+                return json_error(400, "Course code search may only contain letters, numbers, and hyphens");
+            }
+        }
+
         std::string path = "/rest/v1/classes?select=id,code,name,instructor,term&order=name.asc";
         if (!term.empty()) {
             // PostgREST uses * as the wildcard for ILIKE
             char* enc = curl_easy_escape(nullptr, ("*" + term + "*").c_str(), 0);
+            if (!enc) {
+                return json_error(500, "Could not encode name search");
+            }
             path += "&name=ilike." + std::string(enc);
+            curl_free(enc);
+        }
+        if (!code.empty()) {
+            char* enc = curl_easy_escape(nullptr, (code + "*").c_str(), 0);
+            if (!enc) {
+                return json_error(500, "Could not encode course code search");
+            }
+            path += "&code=ilike." + std::string(enc);
             curl_free(enc);
         }
 
