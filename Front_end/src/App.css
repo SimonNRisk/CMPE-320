@@ -1,0 +1,109 @@
+.website {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fc;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  background-color: #002452;
+  color: white;
+  padding: 25px 50px;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0;
+  cursor: pointer;
+}
+
+.header p {
+  margin-bottom: 0;
+  color: #dce5f2;
+}
+
+.home {
+  text-align: center;
+  padding: 70px 30px;
+  flex: 1;
+}
+
+.home h2 {
+  font-size: 36px;
+  color: #002452;
+}
+
+.home p {
+  color: #64748b;
+  font-size: 18px;
+}
+
+.faculty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  max-width: 1050px;
+  margin: 50px auto;
+}
+
+.faculty-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 45px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: 0.2s;
+}
+
+.faculty-card:hover {
+  transform: translateY(-5px);
+  border-color: #b59a57;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.faculty-card h3 {
+  color: #002452;
+  font-size: 21px;
+}
+
+.faculty-card span {
+  color: #b08a35;
+}
+
+.faculty-page {
+  flex: 1;
+  padding: 60px 10%;
+}
+
+.faculty-page h2 {
+  font-size: 36px;
+  color: #002452;
+}
+
+.back-button {
+  background: #002452;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+footer {
+  background: #002452;
+  color: white;
+  text-align: center;
+  padding: 15px;
+}
+
+@media (max-width: 700px) {
+  .faculty-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    padding: 25px 15px;
+  }
+}
