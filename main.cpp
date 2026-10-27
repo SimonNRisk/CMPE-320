@@ -74,7 +74,7 @@ int main()
 
     // GET /classes                  -> all classes
     // GET /classes?name=calc        -> classes whose name contains "calc"
-    // GET /classes?code=MTH         -> classes whose code starts with "MTH"
+    // GET /classes?code=101         -> classes whose code contains "101"
     CROW_ROUTE(app, "/classes")([&cfg](const crow::request& req) {
         std::string term = req.url_params.get("name") ? req.url_params.get("name") : "";
         std::string code = req.url_params.get("code") ? req.url_params.get("code") : "";
@@ -113,7 +113,7 @@ int main()
             curl_free(enc);
         }
         if (!code.empty()) {
-            char* enc = curl_easy_escape(nullptr, (code + "*").c_str(), 0);
+            char* enc = curl_easy_escape(nullptr, ("*" + code + "*").c_str(), 0);
             if (!enc) {
                 return json_error(500, "Could not encode course code search");
             }
