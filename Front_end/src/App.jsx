@@ -4,6 +4,7 @@ import "./App.css";
 function App() {
   //to change between faculties set to null to be at home page
   const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
 // fac options
   const faculties = [
     "Engineering",
@@ -11,6 +12,13 @@ function App() {
     "Arts & Science",
     "Commerce",
     "Concurrent Education"
+  ];
+  const levels = [
+    "100",
+    "200",
+    "300",
+    "400",
+    "500"
   ];
 
   return (
@@ -24,6 +32,11 @@ function App() {
         </h1>
         <p>Extra Resources</p>
       </header>
+
+      <div className="search-bar">
+        <input type="text" placeholder="Search for a specific course..." />
+      </div>
+
      {/* selection */}
       {selectedFaculty === null ? (
         <main className="home">
@@ -45,18 +58,44 @@ function App() {
         </main>
       ) : (
         //subsections
-        <main className="faculty-page">
+        selectedLevel === null ? (
+          <main className="faculty-page">
+            <button
+              className="back-button"
+              onClick={() => setSelectedFaculty(null)}
+            >
+            Back to Home
+            </button>
+
+            <h2>{selectedFaculty}</h2>
+            <p>Welcome to the {selectedFaculty} section! Select course level to find your courses!</p>
+
+            <div className="level-grid">
+              {levels.map((level) => (
+                <button
+                  key={level}
+                  className="level-card"
+                  //go to faculty subsection
+                  onClick={() => setSelectedLevel(level)}
+                >
+                  <h3>{level}</h3>
+                </button>
+              ))}
+            </div>
+          </main>
+      ) : (
+        <main className="level-page">
           <button
-            className="back-button"
-            onClick={() => setSelectedFaculty(null)}
+            className="faculty-back-button"
+            onClick={() => setSelectedLevel(null)}
           >
-           Back to Home
+           Back to Level Selection
           </button>
 
-          <h2>{selectedFaculty}</h2>
-          <p>Welcome to the {selectedFaculty} section!</p>
+          <h2 style = {{marginBottom: '0px'}} onClick={() => setSelectedLevel(null)}>{selectedFaculty}</h2> <h4 style = {{marginTop: '0px'}}> {selectedLevel} </h4>
+          <p>Welcome to the {selectedFaculty} {selectedLevel} level courses!</p>
         </main>
-      )}
+      ))}
 
       <footer>
       </footer>

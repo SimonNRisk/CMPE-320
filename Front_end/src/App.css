@@ -29,11 +29,24 @@
   flex: 1;
 }
 
+.search-bar {
+  margin: 20px auto;
+  margin-bottom: 0px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .home h2 {
   font-size: 36px;
   color: #002452;
 }
-
+s
 .home p {
   color: #64748b;
   font-size: 18px;
@@ -83,6 +96,64 @@
 }
 
 .back-button {
+  background: #002452;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  max-width: 1050px;
+  margin: 50px auto;
+}
+
+.level-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 45px 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transition: 0.2s;
+}
+
+.level-card:hover {
+  transform: translateY(-5px);
+  border-color: #b59a57;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.level-card h3 {
+  color: #002452;
+  font-size: 21px;
+}
+
+.level-card span {
+  color: #b08a35;
+}
+
+.level-page {
+  flex: 1;
+  padding: 60px 10%;
+}
+
+.level-page h2 {
+  font-size: 36px;
+  color: #002452;
+  cursor: pointer;
+}
+
+.level-page h4 {
+  font-size: 30px;
+  color: #64748b;
+}
+
+.faculty-back-button {
   background: #002452;
   color: white;
   padding: 12px 20px;
