@@ -42,6 +42,33 @@ long supabase_get(const SupabaseConfig& cfg, const std::string& path_and_query, 
     return status;
 }
  
+// Sends a DELETE to the Supabase REST API. Returns the HTTP status (0 if unreachable).
+long supabase_delete(const SupabaseConfig& cfg, const std::string& path_and_query, std::string& response)
+{
+    CURL* curl = curl_easy_init();
+    if (!curl) return 0;
+
+    struct curl_slist* headers = auth_headers(cfg);
+    headers = curl_slist_append(headers, "Prefer: return=representation");
+
+    std::string url = cfg.url + path_and_query;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+
+    long status = 0;
+    if (curl_easy_perform(curl) == CURLE_OK) {
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+    }
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+    return status;
+}
+
 // Sends a POST (an insert) to the Supabase REST API. Returns the HTTP status (0 if unreachable).
 long supabase_post(const SupabaseConfig& cfg, const std::string& path, const std::string& json_body, std::string& response)
 {

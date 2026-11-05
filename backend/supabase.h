@@ -18,6 +18,10 @@ long supabase_get(const SupabaseConfig& cfg, const std::string& path_and_query, 
 // Returns the HTTP status (0 if unreachable).
 long supabase_post(const SupabaseConfig& cfg, const std::string& path, const std::string& json_body, std::string& response);
  
+// Sends a DELETE to the Supabase REST API. `response` receives the deleted rows as JSON.
+// Returns the HTTP status (0 if unreachable).
+long supabase_delete(const SupabaseConfig& cfg, const std::string& path_and_query, std::string& response);
+
 // Builds a JSON error response such as {"error":"Class not found"}
 inline crow::response json_error(int code, const std::string& message)
 {

@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     git \
     libasio-dev \
     libcurl4-openssl-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cmake -S backend -B build
