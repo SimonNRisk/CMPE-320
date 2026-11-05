@@ -1,0 +1,16 @@
+# Editor settings that may contain machine-specific paths
+.vscode/settings.json
+
+# CMake build output and local configuration
+build/
+cmake-build-*/
+CMakeUserPresets.json
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
