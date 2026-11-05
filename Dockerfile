@@ -2,15 +2,16 @@ FROM gcc:latest
 
 WORKDIR /app
 
-COPY . .
+COPY backend/ ./backend/
 
 RUN apt-get update && apt-get install -y \
     cmake \
     git \
     libasio-dev \
+    libcurl4-openssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN cmake -S . -B build
+RUN cmake -S backend -B build
 RUN cmake --build build
 
 CMD ["./build/server"]
