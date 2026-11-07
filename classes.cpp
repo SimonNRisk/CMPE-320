@@ -28,25 +28,26 @@ struct SearchField {
 };
  
 // Every entry here becomes a filter. If several are given in one request,
-// ALL of them must match (AND), e.g.  /classes?instructor=smith&term=fall
+// ALL of them must match (AND), e.g.  /classes?subject=MATH&term=fall
 static const SearchField SEARCH_FIELDS[] = {
     //  param          column         match              max  extra chars
-    {  "name",        "name",        Match::Contains,    100, " -"    },
-    {  "code",        "code",        Match::StartsWith,   20, "-"     },
-    {  "instructor",  "instructor",  Match::Contains,    100, " -.'"  },
-    {  "term",        "term",        Match::Contains,     40, " -"    },
-    // {  "requirements", "requirements", Match::Contains, 100, " -,." },   // <- example of a new one
+    {  "name",        "title",       Match::Contains,    100, " -"    },
+    {  "code",        "course_code", Match::StartsWith,   20, " -"    },
+    {  "subject",     "subject",     Match::Exact,         8, ""      },
+    {  "term",        "offering_term", Match::Contains,   40, " -"    },
+    {  "requirements", "requirements", Match::Contains,  100, " -,."  },
 };
  
-// Quick-search box: /classes?q=320 matches if ANY of these columns contains "320" (OR).
-static const char* const QUICK_SEARCH_COLUMNS[] = { "name", "code", "instructor" };
+// Quick-search box: /classes?q=320 matches if any course title, code, or subject contains "320".
+static const char* const QUICK_SEARCH_COLUMNS[] = { "title", "course_code", "subject" };
 static const SearchField QUICK_SEARCH = { "q", nullptr, Match::Contains, 100, " -" };
  
 // Columns returned by the list endpoint (add new columns here to show them in results)
-static const char* const LIST_COLUMNS = "id,code,name,instructor,term";
+static const char* const LIST_COLUMNS =
+    "course_code,subject,number,title,units,description,offering_term,offering_faculty";
  
 // Max rows returned from one search
-static const int RESULT_LIMIT = 100;
+static const int RESULT_LIMIT = 256;
  
 // NOTE on safety: the allowed-character rule below is what keeps users from
 // injecting PostgREST operators or LIKE wildcards. If you ever allow '%', '_',
@@ -110,14 +111,14 @@ static crow::response pass_through(long status, const std::string& body)
 void register_class_routes(crow::SimpleApp& app, const SupabaseConfig& cfg)
 {
     // GET /classes                      -> all classes
-    // GET /classes?name=calc            -> name contains "calc"
-    // GET /classes?code=MTH             -> code starts with "MTH"
-    // GET /classes?instructor=smith     -> instructor contains "smith"
-    // GET /classes?q=320                -> name OR code OR instructor contains "320"
+    // GET /classes?name=calc            -> title contains "calc"
+    // GET /classes?code=MATH            -> course code starts with "MATH"
+    // GET /classes?subject=MATH         -> exact subject match
+    // GET /classes?q=320                -> title, course code, or subject contains "320"
     // Any combination works:  /classes?code=CMPE&term=fall
     CROW_ROUTE(app, "/classes")([&cfg](const crow::request& req) {
-        std::string path = std::string("/rest/v1/classes?select=") + LIST_COLUMNS
-                         + "&order=name.asc&limit=" + std::to_string(RESULT_LIMIT);
+        std::string path = std::string("/rest/v1/courses?select=") + LIST_COLUMNS
+                         + "&order=course_code.asc&limit=" + std::to_string(RESULT_LIMIT);
  
         // One filter per entry in SEARCH_FIELDS
         for (const SearchField& f : SEARCH_FIELDS) {
@@ -165,9 +166,13 @@ void register_class_routes(crow::SimpleApp& app, const SupabaseConfig& cfg)
         return pass_through(status, body);
     });
  
-    // GET /classes/:id  -> one class, with every column
-    CROW_ROUTE(app, "/classes/<int>")([&cfg](int id) {
-        std::string path = "/rest/v1/classes?select=*&id=eq." + std::to_string(id);
+    // GET /classes/:course_code
+    CROW_ROUTE(app, "/classes/<string>")([&cfg](const std::string& course_code) {
+        std::string encoded_code;
+        if (!url_encode(course_code, encoded_code)) {
+            return json_error(500, "Could not encode course code");
+        }
+        std::string path = "/rest/v1/courses?select=*&course_code=eq." + encoded_code;
  
         std::string body;
         long status = supabase_get(cfg, path, body);
@@ -176,7 +181,7 @@ void register_class_routes(crow::SimpleApp& app, const SupabaseConfig& cfg)
         }
         // PostgREST returns a list, so a missing class is an empty list
         if (status == 200 && body == "[]") {
-            return json_error(404, "Class not found");
+            return json_error(404, "Course not found");
         }
         return pass_through(status, body);
     });
